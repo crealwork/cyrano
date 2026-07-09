@@ -1,0 +1,24 @@
+{
+  "name": "cyrano",
+  "version": "0.1.0",
+  "description": "Pre-meeting contact intelligence for AI agents. Give it an email (or the day's calendar) and it researches the person + their company across the web — punching through blocked sites via the bundled insane-search engine — then delivers a source-cited briefing (who they are, what the company does, recent signals, angles to raise) to your configured channel. Portable: any agent can install it and brief its owner before meetings.",
+  "author": {
+    "name": "crealwork"
+  },
+  "license": "MIT",
+  "keywords": [
+    "meeting-prep",
+    "contact-intelligence",
+    "sales-intelligence",
+    "pre-meeting-brief",
+    "recon",
+    "dossier",
+    "calendar",
+    "linkedin",
+    "company-research",
+    "insane-search",
+    "slack",
+    "telegram",
+    "agent-skill"
+  ]
+}

@@ -1,0 +1,17 @@
+# user's real config (may contain domains / chat ids); ship only the example
+skills/cyrano/config.json
+
+# runtime dedup ledger
+skills/cyrano/.state/
+**/.state/
+
+# python
+__pycache__/
+*.pyc
+
+# test scratch
+skills/cyrano/tests/sample_brief.txt
+
+# os
+.DS_Store
+Thumbs.db
