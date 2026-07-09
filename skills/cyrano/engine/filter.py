@@ -74,11 +74,11 @@ def select(payload: dict[str, Any], cfg: dict[str, Any], skip_briefed: bool = Tr
             skipped["internal_only"] += 1
             continue
         for email in externals:
-            dedup_id = state_mod.key(date, event_id, email)
+            dedup_id = state_mod.key(event_id, email)
             if dedup_id in seen:
                 continue
             seen.add(dedup_id)
-            if skip_briefed and state_mod.is_briefed(cfg, date, event_id, email):
+            if skip_briefed and state_mod.is_briefed(cfg, event_id, email):
                 skipped["already_briefed"] += 1
                 continue
             targets.append({

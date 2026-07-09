@@ -12,6 +12,10 @@ __pycache__/
 # test scratch
 skills/cyrano/tests/sample_brief.txt
 
+# agent handoff notes (may contain private working context — never publish)
+HANDOFF.md
+**/HANDOFF.md
+
 # os
 .DS_Store
 Thumbs.db

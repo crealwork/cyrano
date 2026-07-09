@@ -10,6 +10,7 @@ to WebFetch / firecrawl instead of failing silently.
 """
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -30,10 +31,15 @@ def fetch(url: str, extra: list[str] | None = None) -> tuple[int, str]:
             f"{_INSANE_DIR}. Fall back to WebFetch / firecrawl for this URL."
         )
     cmd = [sys.executable, "-m", "engine", url, *(extra or [])]
+    # Force UTF-8 in the child: insane-search prints page text straight to
+    # stdout, which crashes on a Windows cp1252 console for any non-Latin1
+    # character. PYTHONUTF8=1 makes the child's stdout UTF-8 without patching
+    # the bundled upstream. (See feedback_python_windows_encoding.)
+    env = {**os.environ, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}
     try:
         proc = subprocess.run(
             cmd, cwd=str(_INSANE_DIR), capture_output=True,
-            text=True, encoding="utf-8", errors="replace", timeout=120,
+            text=True, encoding="utf-8", errors="replace", timeout=120, env=env,
         )
     except subprocess.TimeoutExpired:
         return 4, f"insane-search timed out on {url}"

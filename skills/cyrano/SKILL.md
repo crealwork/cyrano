@@ -102,7 +102,7 @@ echo '{"date":"2026-07-08","events":[
 ```bash
 python -m engine deliver --brief brief.txt \
   --subject "미팅 브리핑 · Jane Doe (Acme)" \
-  --mark 2026-07-08 evt1 jane@acme.com
+  --mark evt1 jane@acme.com
 ```
 - `mode=return`(기본) → 엔진이 브리핑을 그대로 반환. **네가** 자기 채널(예: Slack
   DM)로 주인에게 전달한다.

@@ -51,17 +51,32 @@ def test_filter_picks_only_external():
 def test_state_dedup_roundtrip():
     tmp = Path(tempfile.mkdtemp())
     cfg = _cfg(tmp)
-    assert not state_mod.is_briefed(cfg, "2026-07-08", "e1", "jane@acme.com")
-    state_mod.mark(cfg, "2026-07-08", "e1", "jane@acme.com")
-    assert state_mod.is_briefed(cfg, "2026-07-08", "e1", "JANE@acme.com")  # case-insensitive
-    # a different day is fresh again
-    assert not state_mod.is_briefed(cfg, "2026-07-15", "e1", "jane@acme.com")
+    assert not state_mod.is_briefed(cfg, "e1", "jane@acme.com")
+    state_mod.mark(cfg, "e1", "jane@acme.com")
+    assert state_mod.is_briefed(cfg, "e1", "JANE@acme.com")  # case-insensitive
+    # a different meeting (event id) is fresh
+    assert not state_mod.is_briefed(cfg, "e2", "jane@acme.com")
+
+
+def test_state_window_expiry():
+    import json as _json
+    import time as _time
+    tmp = Path(tempfile.mkdtemp())
+    cfg = _cfg(tmp)
+    cfg["dedup"]["window_hours"] = 1
+    state_mod.mark(cfg, "e1", "jane@acme.com")
+    # backdate the entry beyond the window -> treated as fresh again
+    p = Path(cfg["dedup"]["state_file"])
+    ledger = _json.loads(p.read_text())
+    ledger[state_mod.key("e1", "jane@acme.com")] = _time.time() - 2 * 3600
+    p.write_text(_json.dumps(ledger))
+    assert not state_mod.is_briefed(cfg, "e1", "jane@acme.com")
 
 
 def test_filter_skips_already_briefed():
     tmp = Path(tempfile.mkdtemp())
     cfg = _cfg(tmp)
-    state_mod.mark(cfg, "2026-07-08", "e1", "jane@acme.com")
+    state_mod.mark(cfg, "e1", "jane@acme.com")
     payload = {"date": "2026-07-08", "events": [
         {"id": "e1", "title": "Intro", "start": "T10",
          "attendees": ["jane@acme.com", "dan@crealwork.com"]}]}

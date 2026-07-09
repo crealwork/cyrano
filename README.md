@@ -59,9 +59,9 @@ cd skills/cyrano && python -m engine config
 ## 엔진 CLI
 
 ```
-python -m engine filter  [--events FILE] [--all]     # 캘린더 → 외부 대상
-python -m engine deliver --brief FILE [--mark D E M]  # 설정된 채널로 전송
-python -m engine check  D E M                         # dedup 확인 (0=fresh)
+python -m engine filter  [--events FILE] [--all]      # 캘린더 → 외부 대상
+python -m engine deliver --brief FILE [--mark EVT EMAIL]  # 설정된 채널로 전송
+python -m engine check  EVT EMAIL                     # dedup 확인 (0=fresh)
 python -m engine state  show|clear                    # dedup 원장
 python -m engine fetch  URL                           # insane-search 프록시
 python -m engine config                               # 해석된 설정(시크릿 마스킹)

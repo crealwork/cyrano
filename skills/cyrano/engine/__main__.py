@@ -2,9 +2,9 @@
 
     python -m engine filter  [--events FILE] [--all]
     python -m engine deliver [--brief FILE] [--subject S]
-                             [--mark DATE EVENT_ID EMAIL]
-    python -m engine mark    DATE EVENT_ID EMAIL
-    python -m engine check   DATE EVENT_ID EMAIL      # exit 0 = fresh, 1 = briefed
+                             [--mark EVENT_ID EMAIL]
+    python -m engine mark    EVENT_ID EMAIL
+    python -m engine check   EVENT_ID EMAIL           # exit 0 = fresh, 1 = briefed
     python -m engine state   show|clear
     python -m engine fetch   URL [-- passthrough args to insane-search]
     python -m engine config                            # resolved config, secrets masked
@@ -70,14 +70,14 @@ def cmd_deliver(args) -> int:
 
 def cmd_mark(args) -> int:
     cfg = cfg_mod.load()
-    state_mod.mark(cfg, args.date, args.event_id, args.email)
-    _emit({"ok": True, "marked": [args.date, args.event_id, args.email]})
+    state_mod.mark(cfg, args.event_id, args.email)
+    _emit({"ok": True, "marked": [args.event_id, args.email]})
     return 0
 
 
 def cmd_check(args) -> int:
     cfg = cfg_mod.load()
-    briefed = state_mod.is_briefed(cfg, args.date, args.event_id, args.email)
+    briefed = state_mod.is_briefed(cfg, args.event_id, args.email)
     _emit({"briefed": briefed})
     return 1 if briefed else 0
 
@@ -133,16 +133,16 @@ def build_parser() -> argparse.ArgumentParser:
     d = sub.add_parser("deliver", help="send a brief via the configured channel")
     d.add_argument("--brief", help="brief text file (default: stdin)")
     d.add_argument("--subject", default="cyrano brief")
-    d.add_argument("--mark", nargs=3, metavar=("DATE", "EVENT_ID", "EMAIL"),
+    d.add_argument("--mark", nargs=2, metavar=("EVENT_ID", "EMAIL"),
                    help="mark briefed on success")
     d.set_defaults(func=cmd_deliver)
 
     m = sub.add_parser("mark", help="record a brief as delivered")
-    m.add_argument("date"); m.add_argument("event_id"); m.add_argument("email")
+    m.add_argument("event_id"); m.add_argument("email")
     m.set_defaults(func=cmd_mark)
 
     c = sub.add_parser("check", help="exit 0 if fresh, 1 if already briefed")
-    c.add_argument("date"); c.add_argument("event_id"); c.add_argument("email")
+    c.add_argument("event_id"); c.add_argument("email")
     c.set_defaults(func=cmd_check)
 
     s = sub.add_parser("state", help="inspect / clear the dedup ledger")
