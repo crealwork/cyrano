@@ -88,6 +88,24 @@ def test_filter_skips_already_briefed():
     assert len(out2["targets"]) == 1
 
 
+def test_configure_save_and_onboarded():
+    tmp = Path(tempfile.mkdtemp())
+    cfgfile = tmp / "config.json"
+    os.environ["CYRANO_CONFIG"] = str(cfgfile)
+    try:
+        assert not cfg_mod.is_onboarded()  # nothing written yet
+        data = cfg_mod.load()
+        data["own_domains"] = ["crealwork.com"]
+        data["onboarded"] = True
+        cfg_mod.save(data)
+        assert cfgfile.exists()
+        reloaded = cfg_mod.load()
+        assert cfg_mod.is_onboarded(reloaded)
+        assert cfg_mod.own_domains(reloaded) == {"crealwork.com"}
+    finally:
+        os.environ.pop("CYRANO_CONFIG", None)
+
+
 def test_deliver_return_mode():
     cfg = _cfg(Path(tempfile.mkdtemp()))
     res = deliver_mod.send("hello brief", cfg)

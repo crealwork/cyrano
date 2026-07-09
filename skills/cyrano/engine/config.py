@@ -30,6 +30,26 @@ def config_path() -> Path:
     return SKILL_DIR / "config.example.json"
 
 
+def real_config_path() -> Path:
+    """Where a user's real config is written (never the checked-in example)."""
+    env = os.environ.get("CYRANO_CONFIG")
+    return Path(env) if env else SKILL_DIR / "config.json"
+
+
+def save(data: dict[str, Any]) -> Path:
+    """Persist config to the real path. Used by `engine configure` onboarding."""
+    path = real_config_path()
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n",
+                    encoding="utf-8")
+    return path
+
+
+def is_onboarded(data: dict[str, Any] | None = None) -> bool:
+    """True once the user has confirmed at least their own domains."""
+    data = data if data is not None else load()
+    return bool(data.get("onboarded")) and bool(own_domains(data))
+
+
 def load() -> dict[str, Any]:
     path = config_path()
     try:

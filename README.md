@@ -42,19 +42,20 @@
 
 ## 빠른 시작
 
-```bash
-# 1) 설정 부트스트랩
-bash skills/cyrano/setup/setup.sh
+설치하면 config를 손으로 안 건드려도 된다. 에이전트에게:
 
-# 2) 내 도메인 + 전송 채널 채우기  (skills/cyrano/config.json)
-#    own_domains, delivery.mode, 채널 시크릿은 env로
+> **"cyrano 셋업해줘"**
 
-# 3) 확인
-cd skills/cyrano && python -m engine config
-```
+라고 하면 온보딩이 돈다 — 내 도메인, 받을 채널, 아침 시간만 확인하고 나머지는
+자동 저장 + 매일 아침 자동 브리핑까지 걸어준다. 컨펌이 필요한 건(도메인 확정, 외부
+발송 켜기, 스케줄) 물어본다.
 
-에이전트에게: *"cyrano로 오늘 외부 미팅 브리핑해줘"* 또는
-*"cyrano로 john@acme.com 리서치해줘"*.
+그 다음부턴:
+
+> *"cyrano로 오늘 외부 미팅 브리핑해줘"* · *"cyrano로 john@acme.com 리서치해줘"*
+
+수동 설정을 보고 싶으면 `python -m engine config`, 채널 상세는
+`skills/cyrano/references/channel-adapters.md`.
 
 ## 엔진 CLI
 
@@ -65,6 +66,7 @@ python -m engine check  EVT EMAIL                     # dedup 확인 (0=fresh)
 python -m engine state  show|clear                    # dedup 원장
 python -m engine fetch  URL                           # insane-search 프록시
 python -m engine config                               # 해석된 설정(시크릿 마스킹)
+python -m engine configure --own-domains ... --mode ... --schedule ...  # 온보딩 저장
 ```
 
 ## 프라이버시

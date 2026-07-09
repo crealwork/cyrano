@@ -6,8 +6,10 @@ description: >
   (LinkedIn·뉴스·펀딩·소셜, 차단 사이트는 번들된 insane-search로 뚫음) 소스가
   인용된 미팅 브리핑을 만들어 설정된 채널로 보낸다. 브리핑엔 인물 프로필, 회사 개요,
   최근 시그널(펀딩/채용/출시), 그리고 미팅에서 쓸 앵글/질문이 담긴다. 포터블 —
-  어떤 AI 에이전트든 설치해서 자기 주인에게 미팅 브리핑을 보낼 수 있다.
-  Korean triggers: 미팅 전 브리핑, 이 사람 누구야, 상대방 리서치해줘, 미팅 준비,
+  어떤 AI 에이전트든 설치해서 자기 주인에게 미팅 브리핑을 보낼 수 있다. 설치 후
+  처음 쓰면 온보딩(도메인·채널·시간만 확인)으로 자동 셋업하고 매일 아침 자동
+  브리핑까지 걸어준다. 컨펌 필요한 건 유저에게 물어본다.
+  Korean triggers: cyrano 셋업, 미팅 전 브리핑, 이 사람 누구야, 상대방 리서치해줘, 미팅 준비,
   누구랑 미팅하는지, 이 회사 알아봐줘, 오늘 미팅 브리핑, 이메일 주인 조사.
   English triggers: who am I meeting, pre-meeting brief, research this contact,
   prep me for my meeting, brief me on this person, look up this company before
@@ -32,14 +34,35 @@ description: >
 
 기계적인 건 엔진에 맡기고, 너는 **판단**만 한다.
 
-## Step 0 — 설정 (최초 1회, idempotent)
+## 온보딩 — 설치 후 자동 셋업 (config 없거나 미온보딩이면 제일 먼저)
 
-```bash
-bash "${CLAUDE_PLUGIN_ROOT}/skills/cyrano/setup/setup.sh"
-```
-`config.json`이 없으면 예시에서 복사해준다. `own_domains`(=내 도메인)가 비어있으면
-브리핑 대상 필터가 동작 안 하니, 사용자에게 자기 도메인과 전송 채널을 물어 채운다.
-자세한 설정은 `references/channel-adapters.md`.
+`python -m engine config`의 `onboarded`가 false면, **다른 무엇보다 먼저** 온보딩을
+돌린다. 목표: 유저는 **컨펌만** 하고 나머지는 네가 자동으로. config 파일을 손으로
+편집하라고 시키지 말 것. (상세 스크립트: `references/onboarding.md`)
+
+1. **내 도메인 자동 감지 + 확인** — 유저 이메일에서 도메인 추출(dan@crealwork.com →
+   crealwork.com). 유저에게: "당신/팀 도메인이 X 맞아요? 내부로 칠 다른 도메인은요?"
+2. **전송 채널 확인** — 지금 이 대화 채널(Slack DM 등)로 받을지 확인. 그러면
+   `mode=return`(호스트인 네가 전달). 웹훅/봇으로 직접 쏘려면 env 시크릿 받기
+   (`references/channel-adapters.md`).
+3. **아침 자동 브리핑 시간 확인** — "매일 아침 몇 시에 오늘 외부 미팅 브리핑 받을래요?
+   (기본 평일 8시)"
+4. **저장 (한 방):**
+   ```bash
+   python -m engine configure --own-domains "a.com,b.com" --mode return --schedule "3 8 * * 1-5"
+   ```
+5. **자동화 걸기** — 네 스케줄러(CronCreate / routine / `schedule` 스킬)로 아래 데일리
+   작업을 만든다. 프롬프트: *"cyrano로 오늘 내 외부 미팅을 브리핑해서 이 채널로 보내줘."*
+   (스케줄 도구가 없으면 `references/deployment-recipes.md`의 로컬 방법 안내.)
+6. **마무리** — "셋업 끝. 평일 8시에 외부 미팅 브리핑 보낼게요. 지금 오늘 미팅으로 한번
+   테스트해볼까요?"
+
+### 반드시 유저 컨펌 (자동 실행 금지)
+- `own_domains` 확정(누구를 '내부'로 볼지) · 외부 직접 발송(slack/telegram/email) 켜기 ·
+  매일 자동 스케줄 걸기/시간 · 첫 브리핑은 보내기 전 미리보기 후 확인.
+
+### 자동으로 OK (묻지 말 것)
+- 도메인 감지 · 리서치 · 브리핑 작성 · `configure` 저장 · dedup 기록.
 
 ## 두 가지 발동 모드
 
